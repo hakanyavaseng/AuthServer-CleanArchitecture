@@ -66,11 +66,17 @@ namespace AuthServer.Persistence.Services
             return menus;
         }
 
-        public async Task<ApiResponse<NoContentDto>> RegisterAuthorizeDefinitionEndpoints(Type type, CancellationToken cancellationToken)
+        public async Task<ApiResponse<MenuDto>> RegisterAuthorizeDefinitionEndpoints(RegisterEndpointsDto registerEndpointsDto, Type type, CancellationToken cancellationToken)
         {
             var menus = GetAuthorizeDefinitionEndpoints(type);
             await SaveEndpointsAsync(menus);
-            return ApiResponse<NoContentDto>.Success(StatusCodes.Status204NoContent);
+
+            if (registerEndpointsDto != null)
+            {
+                await SaveEndpointsAsync(registerEndpointsDto.Menus);
+            }
+
+            return ApiResponse<MenuDto>.Success(StatusCodes.Status204NoContent);
         }
         public async Task<ApiResponse<NoContentDto>> SaveEndpointsAsync(List<MenuDto> menus)
         {

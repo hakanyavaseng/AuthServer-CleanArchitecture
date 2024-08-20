@@ -24,7 +24,7 @@ namespace AuthServer.WebAPI.Controllers
         [HttpGet]
         public IActionResult TestAuth()
         {
-            return Ok("Authenticated");
+            return Ok(authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program)));
         }
 
         [HttpPost("SignIn")]
@@ -46,10 +46,10 @@ namespace AuthServer.WebAPI.Controllers
             return await authenticationService.RefreshTokenAsync(refreshTokenDto, cancellationToken);
         }
 
-        [HttpGet("RegisterEndpoints")]
-        public async Task<ApiResponse<NoContentDto>> RegisterEndpoints(CancellationToken cancellationToken)
+        [HttpPost("RegisterEndpoints")]
+        public async Task<ApiResponse<MenuDto>> RegisterEndpoints(RegisterEndpointsDto? dto, CancellationToken cancellationToken)
         {
-            return await authorizationService.RegisterAuthorizeDefinitionEndpoints(typeof(Program), cancellationToken);
+            return await authorizationService.RegisterAuthorizeDefinitionEndpoints(dto, typeof(Program), cancellationToken);
         }
 
 
