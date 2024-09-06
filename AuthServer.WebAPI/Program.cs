@@ -11,6 +11,8 @@ using System.Text;
 using AuthServer.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Ocelot.DependencyInjection;
+using Ocelot.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +49,6 @@ builder.Services.AddIdentity<AppUser, AppRole>(options =>
 }).AddEntityFrameworkStores<AppDbContext>()
   .AddDefaultTokenProviders();
 #endregion
-
 #region Add Authentication
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<AuthServer.Application.Options.TokenOptions>();
 
@@ -63,13 +64,12 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = tokenOptions.Issuer,
+        ValidIssuer = tokenOptions!.Issuer,
         ValidAudience = tokenOptions.Audience[0],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.SecurityKey))
     };
 });
 #endregion
-
 #region Add Authorization
 //var authorizationService = builder.Services.BuildServiceProvider().GetService<IAuthorizationService>();
 //var roleService = builder.Services.BuildServiceProvider().GetService<IRoleService>();
@@ -77,7 +77,10 @@ builder.Services.AddAuthentication(options =>
 //var endpoints = authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program));
 //await roleService.SaveEndpointsAsync(endpoints);
 #endregion
-
+#region Add Ocelot
+builder.Configuration.AddJsonFile("ocelot.json");
+builder.Services.AddOcelot(builder.Configuration);
+#endregion
 
 var app = builder.Build();
 
@@ -88,6 +91,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+await app.UseOcelot();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();

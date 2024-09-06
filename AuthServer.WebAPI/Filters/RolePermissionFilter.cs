@@ -1,5 +1,4 @@
 ﻿using AuthServer.Application.Attributes;
-using AuthServer.Application.Interfaces.Services;
 using AuthServer.Domain.Entities;
 using AuthServer.Persistence.Contexts;
 using Microsoft.AspNetCore.Identity;
@@ -16,13 +15,11 @@ namespace AuthServer.WebAPI.Filters
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly AppDbContext _context;
-        private readonly ITokenService tokenService;
 
-        public RolePermissionFilter(UserManager<AppUser> userManager, AppDbContext context, ITokenService tokenService)
+        public RolePermissionFilter(UserManager<AppUser> userManager, AppDbContext context)
         {
             _userManager = userManager;
             _context = context;
-            this.tokenService = tokenService;
         }
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
