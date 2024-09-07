@@ -20,7 +20,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<RolePermissionFilter>();
     options.Filters.Add<TransactionFilter>();
 });
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();
@@ -77,11 +76,6 @@ builder.Services.AddAuthentication(options =>
 //var endpoints = authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program));
 //await roleService.SaveEndpointsAsync(endpoints);
 #endregion
-#region Add Ocelot
-builder.Configuration.AddJsonFile("ocelot.json");
-builder.Services.AddOcelot(builder.Configuration);
-#endregion
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -90,8 +84,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-await app.UseOcelot();
+app.UseMiddleware<RolePermissionMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
