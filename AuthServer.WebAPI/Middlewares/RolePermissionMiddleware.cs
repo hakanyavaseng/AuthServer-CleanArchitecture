@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using AuthServer.Application.Attributes;
+using AuthServer.Application.Enums;
 using AuthServer.Domain.Entities;
 using AuthServer.Persistence.Contexts;
 using Microsoft.AspNetCore.Identity;
@@ -27,65 +28,59 @@ namespace AuthServer.WebAPI.Middlewares
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
                 var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                
+                string[] httpRequestPath = context.Request.Path.Value.Split('/');
+                
+                string? controller = httpRequestPath[2];
+                string? action = httpRequestPath[3];
+                string? httpMethod = context.Request.Method;
 
-                // Extract route values
-                var endpoint = context.GetEndpoint();
-                if (endpoint == null)
+                string actionType = httpMethod switch
                 {
-                    await _next(context);
-                    return;
-                }
+                    "GET" => ActionType.Reading.ToString(),
+                    "POST" => ActionType.Writing.ToString(),
+                    "PUT" => ActionType.Updating.ToString(),
+                    "DELETE" => ActionType.Deleting.ToString()
+                };
+                string endpointCode = $"{controller}.{httpMethod}.{actionType}.{action}";
+                
+                var isAuthEndpoint = dbContext.AuthEndpoints.Any(x => x.Code == endpointCode);
 
-                var actionDescriptor = endpoint.Metadata.GetMetadata<ControllerActionDescriptor>();
-                if (actionDescriptor == null)
+                if (isAuthEndpoint)
                 {
-                    await _next(context);
-                    return;
-                }
-
-                var authorizeDefinitionAttribute = actionDescriptor.MethodInfo.GetCustomAttribute<AuthorizeDefinitionAttribute>();
-                var httpMethodAttribute = actionDescriptor.MethodInfo.GetCustomAttribute<HttpMethodAttribute>();
-
-                if (authorizeDefinitionAttribute == null)
-                {
-                    await _next(context);
-                    return;
-                }
-
-                var userId = context.User.Identity?.Name;
-                if (string.IsNullOrEmpty(userId))
-                {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return;
-                }
-
-                var user = await userManager.FindByNameAsync(userId);
-                if (user != null)
-                {
-                    IList<string> userRoles = await userManager.GetRolesAsync(user);
-
-                    string endpointCode = $"{authorizeDefinitionAttribute.Menu}.{httpMethodAttribute?.HttpMethods.First() ?? "GET"}.{Enum.GetName(authorizeDefinitionAttribute.ActionType)}.{actionDescriptor.MethodInfo.Name}";
-
-                    var endpointRecord = await dbContext.AuthEndpoints
-                        .Include(e => e.Roles)
-                        .FirstOrDefaultAsync(e => e.Code == endpointCode);
-
-                    if (endpointRecord != null)
+                    var userId = context.User.Identity?.Name;
+                    if (string.IsNullOrEmpty(userId))
                     {
-                        bool isAuthorized = endpointRecord.Roles.Any(r => userRoles.Contains(r.Name));
-                        if (!isAuthorized)
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return;
+                    }
+
+                    var user = await userManager.FindByNameAsync(userId);
+                    if (user != null)
+                    {
+                        IList<string> userRoles = await userManager.GetRolesAsync(user);
+
+
+                        var endpointRecord = await dbContext.AuthEndpoints
+                            .Include(e => e.Roles)
+                            .FirstOrDefaultAsync(e => e.Code == endpointCode);
+
+                        if (endpointRecord != null)
+                        {
+                            bool isAuthorized = endpointRecord.Roles.Any(r => userRoles.Contains(r.Name));
+                            if (!isAuthorized)
+                            {
+                                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                                return;
+                            }
+                        }
+                        else
                         {
                             context.Response.StatusCode = StatusCodes.Status403Forbidden;
                             return;
                         }
                     }
-                    else
-                    {
-                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                        return;
-                    }
                 }
-
                 await _next(context);
             }
         }
