@@ -48,6 +48,7 @@ namespace AuthServer.WebAPI.Controllers
         }
 
         [HttpPost("RegisterEndpoints")]
+        [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Writing, Definition = "Register endpoints")]
         public async Task<ApiResponse<MenuDto>> RegisterEndpoints(RegisterEndpointsDto? dto, CancellationToken cancellationToken)
         {
             return await authorizationService.RegisterAuthorizeDefinitionEndpointAsync(dto, typeof(Program), cancellationToken);

@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using AuthServer.Application.DTOs.Auth;
+using AuthServer.WebAPI.Extensions;
 using AuthServer.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
@@ -68,20 +69,7 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
-    
-    List<MenuDto> authEndpoints = authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program));
-
-    var registerEndpointDto = new RegisterEndpointsDto
-    {
-        Menus = authEndpoints
-    };
-
-    await authorizationService.RegisterAuthorizeDefinitionEndpointAsync(registerEndpointDto, typeof(Program), CancellationToken.None);
-}
-
+await RegisterAuthorizeDefinitionEndpointsExtension.RegisterAuthorizeDefinitionEndpointsAsync(app);
 
 if (app.Environment.IsDevelopment())
 {
