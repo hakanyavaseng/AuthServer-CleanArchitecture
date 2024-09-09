@@ -8,37 +8,29 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AuthServer.Application.DTOs.Auth;
 using AuthServer.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
-
 var builder = WebApplication.CreateBuilder(args);
-
-
 
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<TransactionFilter>();
 });
-builder.Services.AddTransient<ExceptionHandlingMiddleware>();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 #region Add Layers 
 builder.Services.AddPersistenceLayer(builder.Configuration);
 builder.Services.AddInfrastructureLayer(builder.Configuration);
 #endregion
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
-
 #region Add Identity
 // TODO : Add Identity with json 
 builder.Services.AddIdentity<AppUser, AppRole>(options =>
@@ -70,15 +62,27 @@ builder.Services.AddAuthentication(options =>
 });
 #endregion
 #region Add Authorization
-//var authorizationService = builder.Services.BuildServiceProvider().GetService<IAuthorizationService>();
-//var roleService = builder.Services.BuildServiceProvider().GetService<IRoleService>();
 
-//var endpoints = authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program));
-//await roleService.SaveEndpointsAsync(endpoints);
 #endregion
+
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+using (var scope = app.Services.CreateScope())
+{
+    var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
+    
+    List<MenuDto> authEndpoints = authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program));
+
+    var registerEndpointDto = new RegisterEndpointsDto
+    {
+        Menus = authEndpoints
+    };
+
+    await authorizationService.RegisterAuthorizeDefinitionEndpointAsync(registerEndpointDto, typeof(Program), CancellationToken.None);
+}
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

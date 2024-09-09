@@ -23,7 +23,6 @@ namespace AuthServer.WebAPI.Middlewares
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Create a scope to resolve scoped services
             using (var scope = _serviceProvider.CreateScope())
             {
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
@@ -59,8 +58,6 @@ namespace AuthServer.WebAPI.Middlewares
                     if (user != null)
                     {
                         IList<string> userRoles = await userManager.GetRolesAsync(user);
-
-
                         var endpointRecord = await dbContext.AuthEndpoints
                             .Include(e => e.Roles)
                             .FirstOrDefaultAsync(e => e.Code == endpointCode);

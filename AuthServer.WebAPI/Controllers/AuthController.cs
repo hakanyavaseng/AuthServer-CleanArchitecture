@@ -22,7 +22,8 @@ namespace AuthServer.WebAPI.Controllers
         }
 
         [HttpGet]
-        public IActionResult TestAuth()
+        [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Reading, Definition = "Get authroize definition endpoints")]
+        public IActionResult GetAuthroizeDefinitionEndpoints()
         {
             return Ok(authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program)));
         }
@@ -49,7 +50,7 @@ namespace AuthServer.WebAPI.Controllers
         [HttpPost("RegisterEndpoints")]
         public async Task<ApiResponse<MenuDto>> RegisterEndpoints(RegisterEndpointsDto? dto, CancellationToken cancellationToken)
         {
-            return await authorizationService.RegisterAuthorizeDefinitionEndpoints(dto, typeof(Program), cancellationToken);
+            return await authorizationService.RegisterAuthorizeDefinitionEndpointAsync(dto, typeof(Program), cancellationToken);
         }
 
 
