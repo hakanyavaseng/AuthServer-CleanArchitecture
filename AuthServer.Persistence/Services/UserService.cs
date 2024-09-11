@@ -27,12 +27,12 @@ public class UserService(UserManager<AppUser> userManager, ITokenService tokenSe
     public async Task<ApiResponse<AppUserDto>> GetUserByUserNameOrEmailAsync(string userNameOrEmail)
     {
         if (string.IsNullOrEmpty(userNameOrEmail))
-            throw new Exception("Username or email cannot be null or empty");
+            throw new Exception(L["UserNameOrEmailCannotBeNullOrEmpty"]);
 
         var appUser = await userManager.FindByEmailAsync(userNameOrEmail)
                       ?? await userManager.FindByNameAsync(userNameOrEmail);
         return appUser is null
-            ? ApiResponse<AppUserDto>.Fail("User not found", StatusCodes.Status404NotFound)
+            ? ApiResponse<AppUserDto>.Fail(L["EntityNotFound", "User"], StatusCodes.Status404NotFound)
             : ApiResponse<AppUserDto>.Success(ObjectMapper.Map<AppUserDto>(appUser), StatusCodes.Status200OK);
     }
 }

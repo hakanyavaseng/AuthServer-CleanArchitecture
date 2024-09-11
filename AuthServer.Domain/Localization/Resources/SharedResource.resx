@@ -26,10 +26,13 @@
     <data name="EntityNotFound" xml:space="preserve">
         <value>en</value>
     </data>
-    <data name="EmailOrPasswordIncorrect" xml:space="preserve">
+    <data name="RefreshTokenInvalid" xml:space="preserve">
         <value>en</value>
     </data>
-    <data name="RefreshTokenInvalid" xml:space="preserve">
+    <data name="EmailOrPasswordIncorrect" xml:space="preserve">
+        <value />
+    </data>
+    <data name="UserNameOrEmailCannotBeNullOrEmpty" xml:space="preserve">
         <value>en</value>
     </data>
 </root>

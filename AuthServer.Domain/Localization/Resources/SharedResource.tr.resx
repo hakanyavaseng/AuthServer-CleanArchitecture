@@ -24,4 +24,7 @@
     <data name="RefreshTokenInvalid" xml:space="preserve">
         <value>Gönderilen "refresh token" değeri uygun değil.</value>
     </data>
+    <data name="EmailOrPasswordNotNull" xml:space="preserve">
+        <value>Kullanıcı adı veya şifre boş olamaz.</value>
+    </data>
 </root>

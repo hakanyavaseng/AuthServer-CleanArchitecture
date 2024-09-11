@@ -3,13 +3,14 @@ using AuthServer.Application.DTOs.Roles;
 using AuthServer.Application.Interfaces.Services;
 using AuthServer.Domain.Entities;
 using AuthServer.Persistence.Contexts;
+using AuthServer.Persistence.Services.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthServer.Persistence.Services;
 
-public class RoleService : IRoleService
+public class RoleService : BaseService, IRoleService
 {
     private readonly AppDbContext _context;
     private readonly RoleManager<AppRole> _roleManager;
@@ -39,7 +40,7 @@ public class RoleService : IRoleService
                 .FirstOrDefault());
         if (role != null)
             return ApiResponse<RoleDto>.Success(role, StatusCodes.Status200OK);
-        return ApiResponse<RoleDto>.Fail("Role not found", StatusCodes.Status404NotFound);
+        return ApiResponse<RoleDto>.Fail(L["EntityNotFound", "Role"], StatusCodes.Status404NotFound);
     }
 
     public async Task<ApiResponse<NoContentDto>> CreateRoleAsync(string roleName)
@@ -64,7 +65,7 @@ public class RoleService : IRoleService
                 StatusCodes.Status400BadRequest);
         }
 
-        return ApiResponse<NoContentDto>.Fail("Role not found", StatusCodes.Status404NotFound);
+        return ApiResponse<NoContentDto>.Fail(L["EntityNotFound", "Role"], StatusCodes.Status404NotFound);
     }
 
     public async Task<ApiResponse<NoContentDto>> DeleteRoleAsync(string roleName)
@@ -79,16 +80,16 @@ public class RoleService : IRoleService
                 StatusCodes.Status400BadRequest);
         }
 
-        return ApiResponse<NoContentDto>.Fail("Role not found", StatusCodes.Status404NotFound);
+        return ApiResponse<NoContentDto>.Fail(L["EntityNotFound", "Role"], StatusCodes.Status404NotFound);
     }
 
     public async Task<ApiResponse<NoContentDto>> AssignRoleToUserAsync(AssignRoleToUserDto assignRoleToUserDto)
     {
-        var user = await _context.Users.FindAsync(assignRoleToUserDto.UserId) ?? throw new Exception("User not found");
+        var user = await _context.Users.FindAsync(assignRoleToUserDto.UserId) ?? throw new Exception(L["EntityNotFound", "User"]);
 
         foreach (var userRole in assignRoleToUserDto.RoleIds)
         {
-            var role = await _roleManager.FindByIdAsync(userRole.ToString()) ?? throw new Exception("Role not found");
+            var role = await _roleManager.FindByIdAsync(userRole.ToString()) ?? throw new Exception(L["EntityNotFound", "User"]);
 
             if (!await _userManager.IsInRoleAsync(user, role.Name))
             {
@@ -110,14 +111,14 @@ public class RoleService : IRoleService
             .FirstOrDefaultAsync(e => e.Code == assignRoleToEndpointDto.Code);
 
         if (endpoint == null)
-            return ApiResponse<NoContentDto>.Fail("Endpoint not found", StatusCodes.Status404NotFound);
+            return ApiResponse<NoContentDto>.Fail(L["EntityNotFound", "Endpoint"], StatusCodes.Status404NotFound);
 
         foreach (var roleName in assignRoleToEndpointDto.Roles)
         {
             var role = await _roleManager.FindByNameAsync(roleName);
 
             if (role == null)
-                return ApiResponse<NoContentDto>.Fail("Role not found", StatusCodes.Status404NotFound);
+                return ApiResponse<NoContentDto>.Fail(L["EntityNotFound", "Role"], StatusCodes.Status404NotFound);
 
             if (!endpoint.Roles.Any(r => r.Id == role.Id)) endpoint.Roles.Add(role);
         }

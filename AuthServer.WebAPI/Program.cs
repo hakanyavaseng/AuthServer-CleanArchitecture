@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using AuthServer.Application.Helpers;
 using AuthServer.Domain.Entities;
 using AuthServer.Infrastructure;
 using AuthServer.Persistence;
@@ -78,6 +79,11 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SupportedUICultures = new List<CultureInfo> { new("en-US"), new("tr-TR") };
 });
 
+#endregion
+
+#region  Add ServiceLocator
+var serviceProvider = builder.Services.BuildServiceProvider();
+ServiceLocator.Initialize(serviceProvider);
 #endregion
 
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();

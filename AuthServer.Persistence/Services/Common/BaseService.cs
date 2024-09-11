@@ -1,31 +1,24 @@
 ﻿using AuthServer.Domain.Localization;
 using AutoMapper;
 using Microsoft.Extensions.Localization;
+using System;
+using AuthServer.Application.Helpers;
 
-namespace AuthServer.Persistence.Services.Common;
-
-public class BaseService
+namespace AuthServer.Persistence.Services.Common
 {
-    private readonly Lazy<IMapper> _lazyObjectMapper = new(() => AutoMapper.ObjectMapper.Mapper);
-    private Lazy<IStringLocalizer<SharedResource>> _lazyLocalizer;
-
-    public BaseService()
+    public class BaseService
     {
-        _lazyLocalizer = new Lazy<IStringLocalizer<SharedResource>>(() =>
-            throw new InvalidOperationException("Localizer has not been set."));
-    }
+        private readonly Lazy<IMapper> _lazyObjectMapper;
+        private Lazy<IStringLocalizer<SharedResource>> _lazyLocalizer;
 
-    public IStringLocalizer<SharedResource> Localizer
-    {
-        set
+        public BaseService()
         {
-            if (_lazyLocalizer.IsValueCreated)
-                throw new InvalidOperationException("Localizer can only be set once.");
-            _lazyLocalizer = new Lazy<IStringLocalizer<SharedResource>>(() => value);
+            _lazyObjectMapper = new Lazy<IMapper>(() => ServiceLocator.GetService<IMapper>());
+            _lazyLocalizer = new Lazy<IStringLocalizer<SharedResource>>(() => ServiceLocator.GetService<IStringLocalizer<SharedResource>>());
         }
-    }
 
-    //Public properties
-    public IMapper ObjectMapper => _lazyObjectMapper.Value;
-    public IStringLocalizer<SharedResource> L => _lazyLocalizer.Value;
+        // Public properties
+        public IMapper ObjectMapper => _lazyObjectMapper.Value;
+        public IStringLocalizer<SharedResource> L => _lazyLocalizer.Value;
+    }
 }

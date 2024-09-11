@@ -5,6 +5,7 @@ using AuthServer.Application.DTOs.Auth;
 using AuthServer.Application.Interfaces.Services;
 using AuthServer.Domain.Entities;
 using AuthServer.Persistence.Contexts;
+using AuthServer.Persistence.Services.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
