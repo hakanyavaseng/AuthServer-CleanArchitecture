@@ -1,9 +1,8 @@
-﻿namespace AuthServer.Application.DTOs.Auth
+﻿namespace AuthServer.Application.DTOs.Auth;
+
+public record UserRefreshToken
 {
-    public record UserRefreshToken
-    {
-        public Guid UserId { get; set; }
-        public string Code { get; set; }
-        public DateTime ExpirationTime { get; set; }
-    }
+    public Guid UserId { get; set; }
+    public string Code { get; set; }
+    public DateTime ExpirationTime { get; set; }
 }

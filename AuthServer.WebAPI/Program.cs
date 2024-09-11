@@ -1,28 +1,22 @@
 using System.Globalization;
-using AuthServer.Application.Interfaces.Services;
+using System.Text;
 using AuthServer.Domain.Entities;
-using AuthServer.Persistence;
 using AuthServer.Infrastructure;
+using AuthServer.Persistence;
 using AuthServer.Persistence.Contexts;
+using AuthServer.WebAPI.Extensions;
 using AuthServer.WebAPI.Filters;
+using AuthServer.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using AuthServer.Application.DTOs.Auth;
-using AuthServer.WebAPI.Extensions;
-using AuthServer.WebAPI.Middlewares;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Ocelot.DependencyInjection;
-using Ocelot.Middleware;
+using Microsoft.IdentityModel.Tokens;
+using TokenOptions = AuthServer.Application.Options.TokenOptions;
+
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<TransactionFilter>();
-});
+builder.Services.AddControllers(options => { options.Filters.Add<TransactionFilter>(); });
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -30,21 +24,28 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-#region Add Layers 
+#region Add Layers
+
 builder.Services.AddPersistenceLayer(builder.Configuration);
 builder.Services.AddInfrastructureLayer(builder.Configuration);
+
 #endregion
+
 #region Add Identity
+
 // TODO : Add Identity with json 
 builder.Services.AddIdentity<AppUser, AppRole>(options =>
-{
-    options.User.RequireUniqueEmail = true;
-    options.Password.RequireNonAlphanumeric = false;
-}).AddEntityFrameworkStores<AppDbContext>()
-  .AddDefaultTokenProviders();
+    {
+        options.User.RequireUniqueEmail = true;
+        options.Password.RequireNonAlphanumeric = false;
+    }).AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders();
+
 #endregion
+
 #region Add Authentication
-var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<AuthServer.Application.Options.TokenOptions>();
+
+var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -63,16 +64,20 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenOptions.SecurityKey))
     };
 });
+
 #endregion
+
 #region Add Localization
+
 builder.Services.AddLocalization();
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.DefaultRequestCulture = new RequestCulture("tr-TR");
-    options.SupportedCultures = new List<CultureInfo> { new CultureInfo("en-US"), new CultureInfo("tr-TR") };
-    options.SupportedUICultures = new List<CultureInfo> { new CultureInfo("en-US"), new CultureInfo("tr-TR") };
+    options.SupportedCultures = new List<CultureInfo> { new("en-US"), new("tr-TR") };
+    options.SupportedUICultures = new List<CultureInfo> { new("en-US"), new("tr-TR") };
 });
+
 #endregion
 
 builder.Services.AddTransient<ExceptionHandlingMiddleware>();

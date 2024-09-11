@@ -1,42 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.8" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8"/>
+        <PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.8"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\SharedResource.tr-resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SharedResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\SharedResource.tr-TR.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SharedResource.tr-TR.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Localization\Resources\SharedResource.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>SharedResource.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Update="Resources\SharedResource.tr-resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>SharedResource.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Resources\SharedResource.tr-TR.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>SharedResource.tr-TR.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Localization\Resources\SharedResource.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>SharedResource.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Resources\SharedResource.tr-TR.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>SharedResource.tr-TR.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Localization\Resources\SharedResource.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>SharedResource.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Update="Resources\SharedResource.tr-TR.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>SharedResource.tr-TR.resx</DependentUpon>
+        </Compile>
+        <Compile Update="Localization\Resources\SharedResource.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>SharedResource.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
 
 </Project>

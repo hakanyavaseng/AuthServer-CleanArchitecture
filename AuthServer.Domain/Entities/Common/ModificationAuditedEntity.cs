@@ -1,8 +1,7 @@
-﻿namespace AuthServer.Domain.Entities.Common
+﻿namespace AuthServer.Domain.Entities.Common;
+
+public abstract class ModificationAuditedEntity<TPrimaryKey> : CreationAuditedEntity<TPrimaryKey>
 {
-    public abstract class ModificationAuditedEntity<TPrimaryKey> : CreationAuditedEntity<TPrimaryKey>
-    {
-        public DateTime? LastModifiedDate { get; set; }
-        public string? LastModifiedBy { get; set; }
-    }
+    public DateTime? LastModifiedDate { get; set; }
+    public string? LastModifiedBy { get; set; }
 }

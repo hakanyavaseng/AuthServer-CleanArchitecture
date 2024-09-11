@@ -1,19 +1,15 @@
 ﻿using AutoMapper;
 
-namespace AuthServer.Persistence.AutoMapper
+namespace AuthServer.Persistence.AutoMapper;
+
+public class ObjectMapper
 {
-    public class ObjectMapper
+    private static readonly Lazy<IMapper> mapper = new(() =>
     {
-        public static IMapper Mapper => mapper.Value;
+        var config = new MapperConfiguration(cfg => { cfg.AddProfile<AuthServerMapperProfile>(); });
 
-        private static readonly Lazy<IMapper> mapper = new Lazy<IMapper>(() =>
-        {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<AuthServerMapperProfile>();
-            });
+        return config.CreateMapper();
+    });
 
-            return config.CreateMapper();
-        });
-    }
+    public static IMapper Mapper => mapper.Value;
 }

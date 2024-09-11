@@ -5,12 +5,11 @@ namespace AuthServer.WebAPI.Extensions;
 
 public static class RegisterAuthorizeDefinitionEndpointsExtension
 {
-    
     public static async Task RegisterAuthorizeDefinitionEndpointsAsync(IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
         var authorizationService = scope.ServiceProvider.GetRequiredService<IAuthorizationService>();
-        List<MenuDto> authEndpoints = authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program));
+        var authEndpoints = authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program));
 
         var registerEndpointDto = new RegisterEndpointsDto
         {

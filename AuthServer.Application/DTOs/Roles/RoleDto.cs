@@ -1,8 +1,7 @@
-﻿namespace AuthServer.Application.DTOs.Roles
+﻿namespace AuthServer.Application.DTOs.Roles;
+
+public class RoleDto
 {
-    public class RoleDto
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-    }
+    public Guid Id { get; set; }
+    public string Name { get; set; }
 }

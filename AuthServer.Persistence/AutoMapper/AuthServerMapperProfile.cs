@@ -2,15 +2,14 @@
 using AuthServer.Domain.Entities;
 using AutoMapper;
 
-namespace AuthServer.Persistence.AutoMapper
+namespace AuthServer.Persistence.AutoMapper;
+
+public class AuthServerMapperProfile : Profile
 {
-    public class AuthServerMapperProfile : Profile
+    public AuthServerMapperProfile()
     {
-        public AuthServerMapperProfile()
-        {
-            //AppUser
-            CreateMap<CreateAppUserDto, AppUser>();
-            CreateMap<AppUser, AppUserDto>();
-        }
+        //AppUser
+        CreateMap<CreateAppUserDto, AppUser>();
+        CreateMap<AppUser, AppUserDto>();
     }
 }

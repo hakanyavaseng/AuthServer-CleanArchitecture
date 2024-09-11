@@ -1,18 +1,18 @@
-﻿namespace AuthServer.Application.DTOs.Auth
-{
-    public class TokenResponseDto
-    {
-        public TokenResponseDto(string accessToken, DateTime accessTokenExpiration, string refreshToken, DateTime refreshTokenExpiration)
-        {
-            AccessToken = accessToken;
-            AccessTokenExpiration = accessTokenExpiration;
-            RefreshToken = refreshToken;
-            RefreshTokenExpiration = refreshTokenExpiration;
-        }
+﻿namespace AuthServer.Application.DTOs.Auth;
 
-        public string AccessToken { get; init; }
-        public DateTime AccessTokenExpiration { get; init; }
-        public string RefreshToken { get; init; }
-        public DateTime RefreshTokenExpiration { get; init; }
+public class TokenResponseDto
+{
+    public TokenResponseDto(string accessToken, DateTime accessTokenExpiration, string refreshToken,
+        DateTime refreshTokenExpiration)
+    {
+        AccessToken = accessToken;
+        AccessTokenExpiration = accessTokenExpiration;
+        RefreshToken = refreshToken;
+        RefreshTokenExpiration = refreshTokenExpiration;
     }
+
+    public string AccessToken { get; init; }
+    public DateTime AccessTokenExpiration { get; init; }
+    public string RefreshToken { get; init; }
+    public DateTime RefreshTokenExpiration { get; init; }
 }

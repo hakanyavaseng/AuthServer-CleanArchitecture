@@ -1,8 +1,7 @@
-﻿namespace AuthServer.Application.DTOs.Auth
+﻿namespace AuthServer.Application.DTOs.Auth;
+
+public class MenuDto
 {
-    public class MenuDto
-    {
-        public string Name { get; set; }
-        public List<ActionDto> Actions { get; set; } = new();
-    }
+    public string Name { get; set; }
+    public List<ActionDto> Actions { get; set; } = new();
 }

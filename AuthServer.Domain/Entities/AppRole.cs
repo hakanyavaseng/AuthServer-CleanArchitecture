@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace AuthServer.Domain.Entities
+namespace AuthServer.Domain.Entities;
+
+public class AppRole : IdentityRole<Guid>
 {
-    public class AppRole : IdentityRole<Guid>
-    {
-        public ICollection<AuthEndpoint> AuthEndpoints { get; set; }
-    }
+    public ICollection<AuthEndpoint> AuthEndpoints { get; set; }
 }

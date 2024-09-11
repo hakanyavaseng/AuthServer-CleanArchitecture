@@ -62,6 +62,15 @@ namespace AuthServer.Domain.Localization.Resources {
         /// <summary>
         ///   Looks up a localized string similar to en.
         /// </summary>
+        internal static string EmailOrPasswordIncorrect {
+            get {
+                return ResourceManager.GetString("EmailOrPasswordIncorrect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to en.
+        /// </summary>
         internal static string EntityNotFound {
             get {
                 return ResourceManager.GetString("EntityNotFound", resourceCulture);
@@ -71,9 +80,9 @@ namespace AuthServer.Domain.Localization.Resources {
         /// <summary>
         ///   Looks up a localized string similar to en.
         /// </summary>
-        internal static string PasswordIncorrect {
+        internal static string RefreshTokenInvalid {
             get {
-                return ResourceManager.GetString("PasswordIncorrect", resourceCulture);
+                return ResourceManager.GetString("RefreshTokenInvalid", resourceCulture);
             }
         }
     }

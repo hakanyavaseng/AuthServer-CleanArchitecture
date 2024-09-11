@@ -1,8 +1,7 @@
-﻿namespace AuthServer.Application.DTOs.Roles
+﻿namespace AuthServer.Application.DTOs.Roles;
+
+public class AssignRoleToEndpointsDto
 {
-    public class AssignRoleToEndpointsDto
-    {
-        public string[] Roles { get; set; }
-        public List<string> EndpointCodes { get; set; }
-    }
+    public string[] Roles { get; set; }
+    public List<string> EndpointCodes { get; set; }
 }

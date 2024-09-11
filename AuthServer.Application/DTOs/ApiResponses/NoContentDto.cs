@@ -1,6 +1,5 @@
-﻿namespace AuthServer.Application.DTOs.ApiResponses
+﻿namespace AuthServer.Application.DTOs.ApiResponses;
+
+public record NoContentDto
 {
-    public record NoContentDto
-    {
-    }
 }

@@ -1,83 +1,84 @@
-﻿using AuthServer.Application.DTOs.ApiResponses;
-using SendGrid.Helpers.Errors.Model;
-using System.Net.Mime;
+﻿using System.Net.Mime;
 using System.Text.Json;
+using AuthServer.Application.DTOs.ApiResponses;
+using SendGrid.Helpers.Errors.Model;
 
-namespace AuthServer.WebAPI.Middlewares
+namespace AuthServer.WebAPI.Middlewares;
+
+public class ExceptionHandlingMiddleware : IMiddleware
 {
-    public class ExceptionHandlingMiddleware : IMiddleware
+    private const string DefaultErrorMessage = "An error occurred while processing your request";
+
+    private readonly IWebHostEnvironment _env;
+    private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+
+    public ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> logger, IWebHostEnvironment env)
     {
-        private const string DefaultErrorMessage = "An error occurred while processing your request";
+        _logger = logger;
+        _env = env;
+    }
 
-        private readonly IWebHostEnvironment _env;
-        private readonly ILogger<ExceptionHandlingMiddleware> _logger;
-
-        public ExceptionHandlingMiddleware(ILogger<ExceptionHandlingMiddleware> logger, IWebHostEnvironment env)
+    public async Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
+    {
+        try
         {
-            _logger = logger;
-            _env = env;
+            await next(httpContext);
         }
-
-        public async Task InvokeAsync(HttpContext httpContext, RequestDelegate next)
+        catch (Exception exception) when (httpContext.RequestAborted.IsCancellationRequested)
         {
-            try
-            {
-                await next(httpContext);
-            }
-            catch (Exception exception) when (httpContext.RequestAborted.IsCancellationRequested)
-            {
-                const string message = "Request was cancelled";
-                _logger.LogWarning(exception, message);
+            const string message = "Request was cancelled";
+            _logger.LogWarning(exception, message);
 
-                await WriteErrorResponseAsync(httpContext, StatusCodes.Status499ClientClosedRequest, message);
-            }
-            catch (Exception ex)
-            {
-                await HandleExceptionAsync(httpContext, ex);
-            }
+            await WriteErrorResponseAsync(httpContext, StatusCodes.Status499ClientClosedRequest, message);
         }
-
-        private async Task HandleExceptionAsync(HttpContext httpContext, Exception exception)
+        catch (Exception ex)
         {
-            var statusCode = GetStatusCode(exception);
-            var errorResponse = CreateErrorResponse(exception, statusCode);
-
-            httpContext.Response.Clear();
-            httpContext.Response.StatusCode = statusCode;
-            httpContext.Response.ContentType = MediaTypeNames.Application.Json;
-
-            var json = JsonSerializer.Serialize(errorResponse);
-            _logger.LogError(exception, exception.Message);
-            await httpContext.Response.WriteAsync(json);
+            await HandleExceptionAsync(httpContext, ex);
         }
+    }
 
-        private static int GetStatusCode(Exception exception) =>
-            exception switch
-            {
-                BadRequestException => StatusCodes.Status400BadRequest,
-                NotFoundException => StatusCodes.Status404NotFound,
-                UnauthorizedException => StatusCodes.Status401Unauthorized,
-                ForbiddenException => StatusCodes.Status403Forbidden,
-                _ => StatusCodes.Status500InternalServerError
-            };
+    private async Task HandleExceptionAsync(HttpContext httpContext, Exception exception)
+    {
+        var statusCode = GetStatusCode(exception);
+        var errorResponse = CreateErrorResponse(exception, statusCode);
 
-        private ApiResponse<object> CreateErrorResponse(Exception exception, int statusCode)
+        httpContext.Response.Clear();
+        httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.ContentType = MediaTypeNames.Application.Json;
+
+        var json = JsonSerializer.Serialize(errorResponse);
+        _logger.LogError(exception, exception.Message);
+        await httpContext.Response.WriteAsync(json);
+    }
+
+    private static int GetStatusCode(Exception exception)
+    {
+        return exception switch
         {
-            var errorMessage = _env.IsProduction() ? DefaultErrorMessage : exception.Message;
+            BadRequestException => StatusCodes.Status400BadRequest,
+            NotFoundException => StatusCodes.Status404NotFound,
+            UnauthorizedException => StatusCodes.Status401Unauthorized,
+            ForbiddenException => StatusCodes.Status403Forbidden,
+            _ => StatusCodes.Status500InternalServerError
+        };
+    }
 
-            var errorDto = new ErrorDto(errorMessage, true);
-            return ApiResponse<object>.Fail(errorDto, statusCode);
-        }
+    private ApiResponse<object> CreateErrorResponse(Exception exception, int statusCode)
+    {
+        var errorMessage = _env.IsProduction() ? DefaultErrorMessage : exception.Message;
 
-        private async Task WriteErrorResponseAsync(HttpContext httpContext, int statusCode, string message)
-        {
-            var errorResponse = ApiResponse<object>.Fail(message, statusCode);
-            httpContext.Response.Clear();
-            httpContext.Response.StatusCode = statusCode;
-            httpContext.Response.ContentType = MediaTypeNames.Application.Json;
+        var errorDto = new ErrorDto(errorMessage);
+        return ApiResponse<object>.Fail(errorDto, statusCode);
+    }
 
-            var json = JsonSerializer.Serialize(errorResponse);
-            await httpContext.Response.WriteAsync(json);
-        }
+    private async Task WriteErrorResponseAsync(HttpContext httpContext, int statusCode, string message)
+    {
+        var errorResponse = ApiResponse<object>.Fail(message, statusCode);
+        httpContext.Response.Clear();
+        httpContext.Response.StatusCode = statusCode;
+        httpContext.Response.ContentType = MediaTypeNames.Application.Json;
+
+        var json = JsonSerializer.Serialize(errorResponse);
+        await httpContext.Response.WriteAsync(json);
     }
 }

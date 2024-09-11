@@ -6,54 +6,59 @@ using AuthServer.Application.Enums;
 using AuthServer.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AuthServer.WebAPI.Controllers
+namespace AuthServer.WebAPI.Controllers;
+
+[Route("api/[controller]/[action]")]
+[ApiController]
+public class AuthController : ControllerBase
 {
-    [Route("api/[controller]/[action]")]
-    [ApiController]
-    public class AuthController : ControllerBase
+    private readonly IAuthenticationService authenticationService;
+    private readonly IAuthorizationService authorizationService;
+
+    public AuthController(IAuthenticationService authenticationService, IAuthorizationService authorizationService)
     {
-        private readonly IAuthenticationService authenticationService;
-        private readonly IAuthorizationService authorizationService;
+        this.authenticationService = authenticationService;
+        this.authorizationService = authorizationService;
+    }
 
-        public AuthController(IAuthenticationService authenticationService, IAuthorizationService authorizationService)
-        {
-            this.authenticationService = authenticationService;
-            this.authorizationService = authorizationService;
-        }
+    [HttpGet]
+    [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Reading,
+        Definition = "Get authroize definition endpoints")]
+    public IActionResult GetAuthroizeDefinitionEndpoints()
+    {
+        return Ok(authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program)));
+    }
 
-        [HttpGet]
-        [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Reading, Definition = "Get authroize definition endpoints")]
-        public IActionResult GetAuthroizeDefinitionEndpoints()
-        {
-            return Ok(authorizationService.GetAuthorizeDefinitionEndpoints(typeof(Program)));
-        }
+    [HttpPost("SignIn")]
+    public async Task<ApiResponse<TokenResponseDto>> SignIn([FromBody] LoginDto loginDto,
+        CancellationToken cancellationToken)
+    {
+        return await authenticationService.SignInAsync(loginDto, cancellationToken);
+    }
 
-        [HttpPost("SignIn")]
-        public async Task<ApiResponse<TokenResponseDto>> SignIn([FromBody] LoginDto loginDto, CancellationToken cancellationToken)
-        {
-            return await authenticationService.SignInAsync(loginDto, cancellationToken);
-        }
+    [HttpPost("SignOut")]
+    public async Task<ApiResponse<NoContentDto>> SignOut([FromBody] RefreshTokenRequestDto refreshTokenRequestDto,
+        CancellationToken cancellationToken)
+    {
+        return await authenticationService.SignOutAsync(refreshTokenRequestDto, cancellationToken);
+    }
 
-        [HttpPost("SignOut")]
-        public async Task<ApiResponse<NoContentDto>> SignOut([FromBody] RefreshTokenRequestDto refreshTokenRequestDto, CancellationToken cancellationToken)
-        {
-            return await authenticationService.SignOutAsync(refreshTokenRequestDto, cancellationToken);
-        }
+    [HttpPost("RefreshToken")]
+    [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Writing,
+        Definition = "Get refresh token")]
+    public async Task<ApiResponse<TokenResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto refreshTokenDto,
+        CancellationToken cancellationToken)
+    {
+        return await authenticationService.RefreshTokenAsync(refreshTokenDto, cancellationToken);
+    }
 
-        [HttpPost("RefreshToken")]
-        [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Writing, Definition = "Get refresh token")]
-        public async Task<ApiResponse<TokenResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto refreshTokenDto, CancellationToken cancellationToken)
-        {
-            return await authenticationService.RefreshTokenAsync(refreshTokenDto, cancellationToken);
-        }
-
-        [HttpPost("RegisterEndpoints")]
-        [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Writing, Definition = "Register endpoints")]
-        public async Task<ApiResponse<MenuDto>> RegisterEndpoints(RegisterEndpointsDto? dto, CancellationToken cancellationToken)
-        {
-            return await authorizationService.RegisterAuthorizeDefinitionEndpointAsync(dto, typeof(Program), cancellationToken);
-        }
-
-
+    [HttpPost("RegisterEndpoints")]
+    [AuthorizeDefinition(Menu = AuthorizeDefinitionConsts.Auth, ActionType = ActionType.Writing,
+        Definition = "Register endpoints")]
+    public async Task<ApiResponse<MenuDto>> RegisterEndpoints(RegisterEndpointsDto? dto,
+        CancellationToken cancellationToken)
+    {
+        return await authorizationService.RegisterAuthorizeDefinitionEndpointAsync(dto, typeof(Program),
+            cancellationToken);
     }
 }

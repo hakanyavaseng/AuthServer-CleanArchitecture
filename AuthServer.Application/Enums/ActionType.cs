@@ -1,10 +1,9 @@
-﻿namespace AuthServer.Application.Enums
+﻿namespace AuthServer.Application.Enums;
+
+public enum ActionType
 {
-    public enum ActionType
-    {
-        Reading,
-        Writing,
-        Updating,
-        Deleting
-    }
+    Reading,
+    Writing,
+    Updating,
+    Deleting
 }
