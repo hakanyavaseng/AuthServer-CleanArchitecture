@@ -1,3 +1,4 @@
+using System.Globalization;
 using AuthServer.Application.Interfaces.Services;
 using AuthServer.Domain.Entities;
 using AuthServer.Persistence;
@@ -12,6 +13,7 @@ using AuthServer.Application.DTOs.Auth;
 using AuthServer.WebAPI.Extensions;
 using AuthServer.WebAPI.Middlewares;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
@@ -62,10 +64,18 @@ builder.Services.AddAuthentication(options =>
     };
 });
 #endregion
-#region Add Authorization
+#region Add Localization
+builder.Services.AddLocalization();
 
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("tr-TR");
+    options.SupportedCultures = new List<CultureInfo> { new CultureInfo("en-US"), new CultureInfo("tr-TR") };
+    options.SupportedUICultures = new List<CultureInfo> { new CultureInfo("en-US"), new CultureInfo("tr-TR") };
+});
 #endregion
 
+builder.Services.AddTransient<ExceptionHandlingMiddleware>();
 
 var app = builder.Build();
 
@@ -76,6 +86,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRequestLocalization();
 app.UseMiddleware<RolePermissionMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 

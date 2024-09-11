@@ -1,9 +1,12 @@
 ﻿using AuthServer.Application.DTOs.ApiResponses;
 using AuthServer.Application.DTOs.Auth;
 using AuthServer.Application.Interfaces.Services;
+using AuthServer.Domain;
 using AuthServer.Domain.Entities;
+using AuthServer.Domain.Localization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Localization;
 
 namespace AuthServer.Persistence.Services
 {
@@ -11,11 +14,12 @@ namespace AuthServer.Persistence.Services
     {
         private readonly UserManager<AppUser> userManager;
         private readonly ITokenService tokenService;
-
-        public AuthenticationService(UserManager<AppUser> userManager, ITokenService tokenService)
+        private readonly IStringLocalizer<SharedResource> localizer;
+        public AuthenticationService(UserManager<AppUser> userManager, ITokenService tokenService, IStringLocalizer<SharedResource> localizer)
         {
             this.userManager = userManager;
             this.tokenService = tokenService;
+            this.localizer = localizer;
         }
 
         public async Task<ApiResponse<TokenResponseDto>> SignInAsync(LoginDto loginDto,
@@ -25,7 +29,7 @@ namespace AuthServer.Persistence.Services
 
             AppUser? appUser = await userManager.FindByEmailAsync(loginDto.UserNameOrEmail) ?? await userManager.FindByNameAsync(loginDto.UserNameOrEmail);
             if (appUser is null)
-                return ApiResponse<TokenResponseDto>.Fail("User not found", StatusCodes.Status404NotFound);
+                return ApiResponse<TokenResponseDto>.Fail(localizer["EntityNotFound", "User"], StatusCodes.Status404NotFound);
 
             bool isPasswordCorrect = await userManager.CheckPasswordAsync(appUser, loginDto.Password);
             if (!isPasswordCorrect)
